@@ -23,7 +23,7 @@ void		ft_append(t_players** head, unsigned char *new_data)
     t_players	*new_node;
     t_players	*last;
     int         i;
-    int         j;
+    unsigned int         j;
 
     i = 4;
     j = 0;
@@ -45,13 +45,9 @@ void		ft_append(t_players** head, unsigned char *new_data)
         i++;
         j++;
     }
-    i += 6;
+    i += 3;
     j = 0;
-    new_node->code = ft_memalloc(sizeof(unsigned char *) * )
-    while (j < new_node->info.prog_size)
-    {
-        j++;
-    }
+    new_node->code = &new_data[i];
     new_node->next = NULL;
     if (*head == NULL)
     {
@@ -64,11 +60,16 @@ void		ft_append(t_players** head, unsigned char *new_data)
     return ;
 }
 
+void    load_players(t_players *pl, t_obj *c)
+{
+    
+}
+
 int     main(int ac, char **av)
 {
     int fd;
     t_obj *c;
-    int i;
+    unsigned int i;
     t_players *pl;
     
     if (ac < 2)
@@ -90,12 +91,12 @@ int     main(int ac, char **av)
     line = NULL;
     j = ft_read_memory(fd, &line);
     ft_append(&pl, line);
-    printf("%d", pl->info.prog_size);
-    // while (i < COMMENT_LENGTH)
-    // {
-    //     printf("%c ", pl->info.comment[i]);
-    //     i++;
-    // }
+    // printf("%d", pl->info.prog_size);
+    while (i < MEM_SIZE)
+    {
+        printf("%x ", c->arena[i]);
+        i++;
+    }
     // ft_putendl(pl->info->prog_name);
     return (1);
 }
