@@ -18,6 +18,15 @@ t_obj       *initialize_obj(void)
     return (c);
 }
 
+void        ft_puthex(unsigned char c)
+{
+    char *tab;
+
+    tab = "0123456789abcdef";
+    ft_putchar(tab[c / 16]);
+    ft_putchar(tab[c % 16]);
+}
+
 void		ft_append(t_players** head, unsigned char *new_data)
 {
     t_players	*new_node;
@@ -60,9 +69,34 @@ void		ft_append(t_players** head, unsigned char *new_data)
     return ;
 }
 
-void    load_players(t_players *pl, t_obj *c)
-{
+// void    load_players(t_players *pl, t_obj *c)
+// {
     
+// }
+
+void    ft_puthex2(int c)
+{
+    char *tab;
+
+    tab = "0123456789abcdef";
+    ft_putchar(tab[((c / 16 / 16) / 16)]);
+    ft_putchar(tab[((c / 16) / 16)]);
+    ft_putchar(tab[(c / 16) % 16]);
+    ft_putchar(tab[c % 16]);
+}
+
+void    *ft_write_to(void *arena, void *code, size_t start, size_t size)
+{
+    unsigned char *d;
+	unsigned char *s;
+	d = (unsigned char *)arena;
+	s = (unsigned char *)code;
+	while (start < size)
+	{
+		d[start] = s[start];
+		start++;
+	}
+	return (arena);
 }
 
 int     main(int ac, char **av)
@@ -74,29 +108,54 @@ int     main(int ac, char **av)
     
     if (ac < 2)
     {
-        ft_putendl("Usage: ./corewar [-dump nbr_cycles] [[-n number] champion1.cor] ...");
-        ft_putendl("#### TEXT OUTPUT MODE ##########################################################");
-        ft_putendl("    -dump nbr_cycles    : Dumps memory after N cycles then exits");
-        ft_putendl("################################################################################");
+        ft_putendl("Usage: ./corewar [-dump numbers_of_cycles] [ [-a load_address] champion1.cor] ...");
         return (0);
     }
     pl = NULL;
     c = initialize_obj();
     fd = 0;
-    fd = open(av[1], O_RDONLY);
-    i = 0;
-    unsigned char *line;
-    int j;
-
-    line = NULL;
-    j = ft_read_memory(fd, &line);
-    ft_append(&pl, line);
+   
     // printf("%d", pl->info.prog_size);
-    while (i < MEM_SIZE)
-    {
-        printf("%x ", c->arena[i]);
-        i++;
+    if (ft_strequ(av[1], "-d"))
+    { 
+        fd = open(av[2], O_RDONLY);
+        i = 0;
+        unsigned char *line;
+        int j;
+        int x;
+        int y;
+
+        line = NULL;
+        j = ft_read_memory(fd, &line);
+        ft_append(&pl, line);
+        ft_write_to(c->arena, pl->code, 0, pl->info.prog_size);
+        x = 1;
+        y = 0;
+        ft_putstr("0x");
+        ft_puthex2(i);
+        ft_putstr(" : ");
+        while (i < MEM_SIZE)
+        {
+            ft_puthex(c->arena[i]);
+            if (i < MEM_SIZE - 1)
+                ft_putchar(' ');
+            if (x == 64)
+            {
+                if (i < MEM_SIZE - 1)
+                {
+                    ft_putchar('\n');
+                    ft_putstr("0x");
+                    // ft_putnbr(i);
+                    ft_puthex2(i + 1);
+                    ft_putstr(" : ");
+                }
+                x = 0;
+            }
+            x++;
+            i++;
+        }
     }
+    
     // ft_putendl(pl->info->prog_name);
     return (1);
 }
