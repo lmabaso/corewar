@@ -89,73 +89,119 @@ void    *ft_write_to(void *arena, void *code, size_t start, size_t size)
 {
     unsigned char *d;
 	unsigned char *s;
+    size_t          i;
+
 	d = (unsigned char *)arena;
 	s = (unsigned char *)code;
-	while (start < size)
+    i = 0;
+	while (i < size)
 	{
-		d[start] = s[start];
-		start++;
+		d[start + i] = s[i];
+		i++;
 	}
 	return (arena);
 }
 
+void    ft_print_dump(t_obj *c)
+{
+    int x;
+    int y;
+    int i;
+
+    x = 1;
+    y = 0;
+    i = 0;
+    ft_putstr("0x");
+    ft_puthex2(i);
+    ft_putstr(" : ");
+    while (i < MEM_SIZE)
+    {
+        ft_puthex(c->arena[i]);
+        if (i < MEM_SIZE - 1)
+            ft_putchar(' ');
+        if (x == 64)
+        {
+            if (i < MEM_SIZE - 1)
+            {
+                ft_putchar('\n');
+                ft_putstr("0x");
+                // ft_putnbr(i);
+                ft_puthex2(i + 1);
+                ft_putstr(" : ");
+            }
+            x = 0;
+        }
+        x++;
+        i++;
+    }
+}
+
+void    ft_load_champions(t_obj *c)
+{
+    int i;
+    int offset;
+    t_players *pl;
+
+    i = 0;
+    pl = c->worriors;
+    offset = MEM_SIZE / c->no_of_worriors;
+    while (i < c->no_of_worriors)
+    {
+        pl->pc = offset * i;
+        pl->cool_time = 0;
+        ft_write_to(c->arena, pl->code, offset * i, pl->info.prog_size);
+        pl = pl->next;
+        i++;
+    }
+}
+
+void    ft_read_champions(t_obj *c, int ac, char **av)
+{
+    int i;
+    unsigned char *line;
+    int fd;
+    int j;
+
+    i = 0;
+    fd = 0;
+    c->no_of_worriors = 0;
+    line = NULL;
+    while (i < ac)
+    {
+        fd = open(av[i], O_RDONLY);
+        j = ft_read_memory(fd, &line);
+        ft_append(&c->worriors, line);
+        c->no_of_worriors++;
+        i++;
+    }
+}
+
 int     main(int ac, char **av)
 {
-    int fd;
     t_obj *c;
-    unsigned int i;
-    t_players *pl;
-    
+
     if (ac < 2)
     {
         ft_putendl("Usage: ./corewar [-dump numbers_of_cycles] [ [-a load_address] champion1.cor] ...");
         return (0);
     }
-    pl = NULL;
     c = initialize_obj();
-    fd = 0;
-   
-    // printf("%d", pl->info.prog_size);
-    if (ft_strequ(av[1], "-d"))
-    { 
-        fd = open(av[2], O_RDONLY);
-        i = 0;
-        unsigned char *line;
-        int j;
-        int x;
-        int y;
-
-        line = NULL;
-        j = ft_read_memory(fd, &line);
-        ft_append(&pl, line);
-        ft_write_to(c->arena, pl->code, 0, pl->info.prog_size);
-        x = 1;
-        y = 0;
-        ft_putstr("0x");
-        ft_puthex2(i);
-        ft_putstr(" : ");
-        while (i < MEM_SIZE)
+    if (ft_strequ(av[1], "-dump"))
+    {
+        if (!ft_isnumber(av[2]))
         {
-            ft_puthex(c->arena[i]);
-            if (i < MEM_SIZE - 1)
-                ft_putchar(' ');
-            if (x == 64)
-            {
-                if (i < MEM_SIZE - 1)
-                {
-                    ft_putchar('\n');
-                    ft_putstr("0x");
-                    // ft_putnbr(i);
-                    ft_puthex2(i + 1);
-                    ft_putstr(" : ");
-                }
-                x = 0;
-            }
-            x++;
-            i++;
+            ft_putendl("Usage: ./corewar [-dump numbers_of_cycles] [ [-a load_address] champion1.cor] ...");
+            return (0);
         }
+        ft_read_champions(c, ac - 3, &av[3]);
+        ft_load_champions(c);
+        ft_print_dump(c);
     }
-    
+    else
+    {
+        ft_read_champions(c, ac - 1, &av[1]);
+        ft_load_champions(c);
+    }
     // ft_putendl(pl->info->prog_name);
     return (1);
 }
